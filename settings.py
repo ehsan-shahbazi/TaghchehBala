@@ -22,12 +22,15 @@ class Table:
 
 class Settings:
     def __init__(self):
+
         location = '../datas/recommendation/recommendation/'
+        self.list_of_files = ['book-categories', 'books', 'download-sample', 'purchases', 'quotes', 'readings',
+                              'reviews', 'wishlists']
         self.table_of_categories = Table(location, 'book-categories')
-        self.table_of_books = '../datas/recommendation/recommendation/books.csv'
-        self.table_of_download_samples = '../datas/recommendation/recommendation/download-sample.csv'
-        self.table_of_purchases = '../datas/recommendation/recommendation/purchases.csv'
-        self.table_of_quotes = '../datas/recommendation/recommendation/quotes.csv'
-        self.table_of_readings = '../datas/recommendation/recommendation/readings.csv'
-        self.table_of_reviews = '../datas/recommendation/recommendation/reviews.csv'
-        self.table_of_whishlists = '../datas/recommendation/recommendation/whishlists.csv'
+        self.table_of_books = Table(location, 'books')
+        self.table_of_download_samples = Table(location, 'download-sample')
+        self.table_of_purchases = Table(location, 'purchases')
+        self.table_of_quotes = Table(location, 'quotes')
+        self.table_of_readings = Table(location, 'readings')
+        self.table_of_reviews = Table(location, 'reviews')
+        self.table_of_whishlists = Table(location, 'whishlists')
