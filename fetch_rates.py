@@ -22,7 +22,7 @@ def vec2rate(inp_vec):
 
 
 class Files:
-    def __init__(self):
+    def __init__(self, load_ratings=False):
         print('loading the files...\nloading reviews')
         self.file_of_reviews = read_csv(settings.table_of_reviews.give_address())
         print('loading quotes')
@@ -38,6 +38,10 @@ class Files:
         print('loading books')
         self.file_of_books = read_csv(settings.table_of_books.give_address())
         print('all the files are loaded.\n' + '=' * 100)
+        if load_ratings:
+            self.file_of_ratings = read_csv('my_ratings.csv')
+        else:
+            self.file_of_ratings = None
 
     def close_all(self):
         del self.file_of_download_samples
@@ -50,11 +54,13 @@ class Files:
 
 
 class RateCalculator:
-    def __init__(self):
-        self.files = Files()
+    def __init__(self, load_ratings=False):
+        self.files = Files(load_ratings=load_ratings)
         self.user_id_list = self.find_users()
         self.item_id_list = self.find_items()
         self.rated_item_id_list = self.find_rated_items()
+        self.user_coding = {}
+        self.item_coding = {}
         # self.files.close_all()
 
     def find_users(self):
@@ -70,6 +76,10 @@ class RateCalculator:
         users1.union(set(self.files.file_of_download_samples.loc[:, 'AccountId']))
         out = list(users1)
         print('we have ', len(out), ' users')
+        with open('AccountCoding', 'w') as file:
+            for index, val in enumerate(out):
+                file.write(str(index) + ',' + str(val) + '\n')
+                self.user_coding[val] = index
         return out
 
     def find_items(self):
@@ -77,6 +87,10 @@ class RateCalculator:
         books1 = set(self.files.file_of_books.loc[:, 'Id'])
         out = list(books1)
         print('we have ', len(out), ' items.')
+        with open('ItemCoding', 'w') as file:
+            for index, val in enumerate(out):
+                file.write(str(index) + ',' + str(val) + '\n')
+                self.item_coding[val] = index
         return out
 
     def find_rated_items(self):
@@ -156,6 +170,19 @@ class RateCalculator:
                 if rate[0]:
                     file.write(str(user) + ',' + str(item) + ',' + str(vec2rate(rate)) + '\n')
 
+    def update_user_item_coding(self):
+        if self.files.file_of_ratings:
+            with open('my_coded_ratings', 'w') as file:
+                num_of_interactions = self.files.file_of_ratings.shape[0]
+                for interaction in self.files.file_of_ratings.iterrows():
+                    if (interaction[0] % 500) == 0:
+                        print(interaction[0] * 100 / num_of_interactions, ' % completed.')
+                    user = self.user_coding[interaction[1][0]]
+                    item = self.item_coding[interaction[1][1]]
+                    rate = interaction[1][2]
+                    file.write(str(user) + ',' + str(item) + ',' + str(vec2rate(rate)) + '\n')
 
-rater = RateCalculator()
-rater.mother_process()
+
+rater = RateCalculator(load_ratings=True)
+rater.update_user_item_coding()
+# rater.mother_process()
